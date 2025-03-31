@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Mode - FluentMate</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='practice.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Practice Mode 🗣️</h1>
+        <select id="language-select">
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="ja">Japanese</option>
+            <option value="hi">Hindi</option>
+        </select>
+        <div id="chat-box">
+            <div class="bot-message">Welcome! Start chatting with me.</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off">
+            <button id="send-btn">Send</button>
+        </div>
+        <button id="back-btn" onclick="window.location.href='/'">Back to Home</button>
+    </div>
+    <script>
+        document.getElementById("send-btn").addEventListener("click", sendMessage);
+        document.getElementById("user-input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") sendMessage();
+        });
+        function sendMessage() {
+            let userInput = document.getElementById("user-input").value.trim();
+            if (userInput === "") return;
+    
+            let chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<div class="user-message">${userInput}</div>`;
+            document.getElementById("user-input").value = "";
+    
+            fetch("/get_response", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                chatBox.innerHTML += `<div class="bot-message">${data.reply}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>    
+</body>
+</html>
